@@ -106,6 +106,7 @@ void usage(int status)
 void version(void)
 {
 	printf("ascii 1.5\n");
+	exit(EXIT_SUCCESS);
 }
 
 string strskp(const char* str, const char target[])
