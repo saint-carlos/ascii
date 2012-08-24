@@ -1,4 +1,13 @@
-all: ascii
+EXEC := ascii
+TMP_TEST := tests/tmp
+TEST_FILES := 
+TESTS := $(addprefix tests/,${TEST_FILES})
+
+all: ${EXEC}
 
 clean:
-	rm ascii
+	rm -rf ${EXEC} ${TMP_TEST}
+
+test: ${EXEC} ${TESTS}
+	mkdir -p ${TMP_TEST}
+	tests/run.sh ${CURDIR}/${EXEC} ${TMP_TEST} ${TESTS}
