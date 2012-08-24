@@ -37,7 +37,7 @@ cmp $TESTDIR/common.sh $temp
 cmp $TESTDIR/common.sh $temp
 
 rand=`mktemp`
-dd if=/dev/urandom bs=800 count=1 2>/dev/null | od -An -t u1 | tr -d '\n' | sed 's/  */ /g' | cut -c2- > $rand
+jot -s ' ' -r 800 0 255 > $rand
 
 < $rand loopback_ascii_a > $temp
 cmp $rand $temp
