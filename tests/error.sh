@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+. $TESTDIR/common.sh
 temp=`mktemp`
 
 is_integer()
@@ -44,15 +45,6 @@ verify_stderr()
 	return 0
 
 }
-
-mute_ascii()
-{
-	$ascii "$@" > /dev/null 2>&1
-}
-
-if $VERBOSE; then
-  set -x
-fi
 
 false_positive=false
 false_negative=false

@@ -4,7 +4,11 @@ ascii="$1"
 TMPDIR="$2"
 export ascii TMPDIR
 shift 2
+
 TESTS="$@"
+TESTDIR=tests
+export TESTDIR
+
 : ${VERBOSE:=false}
 export VERBOSE
 if $VERBOSE; then
