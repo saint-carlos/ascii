@@ -33,6 +33,7 @@ static struct
 	off_t current_arg_offset ;
 
 	int status ;
+	bool has_output ;
 } global ;
 
 
@@ -247,6 +248,7 @@ static void codes_to_chars(char number_format, unsigned char* input_buffer, size
 					global.put_special_char(c) ;
 				else
 					putchar(global.get_nonstandard_char(c)) ;
+				global.has_output = true ;
 			}
 			else
 			{
@@ -285,6 +287,7 @@ static void chars_to_codes(char number_format, unsigned char* input_buffer, size
 
 			formatted = printf(current_number_format_string, (int)c) ;
 			current_number_format_string = number_format_string ; // the next writes will print a space before the number.
+			global.has_output = true ;
 		}
 
 		last_read = global.read_input(input_buffer, input_buffer_size) ;
@@ -406,9 +409,10 @@ int main (int argc, char **argv)
 		fprintf(stderr, "not enough memory\n") ;
 		exit(EXIT_FAILURE) ;
 	}
+	global.has_output = false ;
 	ascii(number_format, input_buffer, insize) ;
 	free(input_buffer) ;
-	if (end_with_newline)
+	if (end_with_newline && global.has_output)
 		printf("\n", 1) ;
 
 	exit(global.status);
