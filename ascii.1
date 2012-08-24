@@ -1,0 +1,57 @@
+.TH ascii "1" "August 2012" "ascii 1.5" "User Commands"
+.SH NAME
+ascii \- translate between ASCII numbers and their ASCII codes
+.SH SYNOPSIS
+.B ascii
+[\fI-axnp\fR] [\fI-s|S\fR] [\fIARG\fR]...
+.br
+.B ascii
+\fI-l\fR
+.SH DESCRIPTION
+.\" Add any additional description here
+.PP
+Translate between ASCII numbers and their ASCII codes. ARG is the string to be translated.
+.TP
+\fB\-a\fR, \fB\-\-to\-char\fR
+read ASCII codes and print them out as ASCII characters, instead of the other way around.
+.TP
+\fB\-x\fR, \fB\-\-hexadecimal\fR
+read/write ASCII codes as hexadecimal instead of decimal.
+.TP
+\fB\-n\fR, \fB\-\-no\-newline\fR
+do not append a newline on the end.
+.TP
+\fB\-s\fR, \fB\-\-special\-chars\fR
+print special nonprintable characters as their descriptive acronyms (e.g. a backspace is BS).
+.TP
+\fB\-S\fR, \fB\-\-long\-special\-chars\fR
+print special nonprintable characters as their descriptive long names.
+.TP
+\fB\-l\fR, \fB\-\-list\-special\fR
+list the known special characters and exit.
+.TP
+\fB\-p\fR, \fB\-\-nonstandard\fR
+print non\-standard characters (of a value 128 or higher) instead of just a placeholder. this may not work correctly or as expected when the output is the terminal, depending on your terminal. your terminal may also choose to print nonstandard characters as placeholders.
+.TP
+\fB\-\-help\fR
+display this help and exit
+.TP
+\fB\-\-version\fR
+output version information and exit
+.PP
+With no arguments, read standard input.
+.PP
+An error occures when ascii tries to translate a number to its ascii value, but the number is not between 0 and 255. in that case, the erronous string is printed to stderr, and ascii continues translating the next token.
+.SH "RETURN VALUE"
+Exit status is 0 if OK, 1 if an some error occurred.
+.SH AUTHOR
+Written by idank.
+.SH "SEE ALSO"
+.BR ascii (7),
+.BR base64 (1),
+.BR echo (1),
+.BR fmt (1),
+.BR hd (1),
+.BR od (1),
+.BR sed (1),
+.BR tr (1)
