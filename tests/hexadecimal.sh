@@ -44,23 +44,23 @@ set +e
 
 # hexadecimal codes output
 FILE="$TMPDIR/$$"
-echo "Alabama" > $FILE-01
-echo "Colorado, Alabama" > $FILE-02
-echo "abcdefghijklmnopqrstuvwxyz" > $FILE-03
-echo "ABCDEFGHIJKLMNOPQRSTUVWXYZ" > $FILE-04
+echo -n "Alabama" > $FILE-01
+echo -n "Colorado, Alabama" > $FILE-02
+echo -n "abcdefghijklmnopqrstuvwxyz" > $FILE-03
+echo -n "ABCDEFGHIJKLMNOPQRSTUVWXYZ" > $FILE-04
 echo "0123456789" > $FILE-05
-echo "!\"#$%&'()*+,-./:;<=>?@[\\]^_\`{|}~" > $FILE-06
-echo "" > $FILE-08
+echo -n "!\"#$%&'()*+,-./:;<=>?@[\\]^_\`{|}~" > $FILE-06
+echo -n "" > $FILE-08
 cat $TESTDIR/common.sh > $FILE-09
 cp `which echo` $FILE-10
 cat /bin/* > $FILE-11
 dd if=/dev/urandom of=$FILE-11 count=200 bs=200 2>/dev/null
 
-expected=`mktemp expected.XXX`
-actual=`mktemp actual.XXX`
+expected=`mktemp $TMPDIR/expected.XXX`
+actual=`mktemp $TMPDIR/actual.XXX`
 for INPUT in $FILE-*; do
 	to_codes < $INPUT > $expected
 	$ascii -x < $INPUT > $actual
-	cmp $expected $actual || exit 1
+	diff -u $expected $actual || exit 1
 done
 exit 0
