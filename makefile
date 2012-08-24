@@ -1,6 +1,6 @@
 EXEC := ascii
 TMP_TEST := tests/tmp
-TEST_FILES := error.sh from-argv.sh from-stdin.sh hexadecimal.sh
+TEST_FILES := error.sh from-argv.sh from-stdin.sh hexadecimal.sh list.sh
 TESTS := $(addprefix tests/,${TEST_FILES})
 
 all: ${EXEC}
