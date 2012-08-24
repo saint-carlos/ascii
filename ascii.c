@@ -95,8 +95,8 @@ void usage(int status)
 				"   -S, --long-special-chars    print special nonprintable characters as their descriptive long names.\n"
 				"   -l, --list-special          list the known special characters and exit.\n"
 				"   -p, --nonstandard           print non-standard characters (of a value 128 or higher) instead of just a placeholder. this may not work correctly or as expected when the output is the terminal, depending on your terminal. your terminal may also choose to print nonstandard characters as placeholders.\n"
-				"   --help                      display this help and exit."
-				"   --version                   output version information and exit."
+				"   --help                      display this help and exit.\n"
+				"   --version                   output version information and exit.\n"
 				, stdout);
 		fputs ("\nWith no arguments, read standard input.\n", stdout);
 	}
