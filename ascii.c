@@ -24,24 +24,24 @@ static struct
 	int (*put_special_char)(unsigned char c) ; /* put a representation of the special char 'c' into 'destination', returns amount of characters written */
 	unsigned char (*get_nonstandard_char)(unsigned char c) ; /* return a representation for the nonstandard character 'c' */
 
-	unsigned char nonstandard_placeholder ;
+	unsigned char nonstandard_placeholder;
 
-	string* argv ;
-	bool delimit_args ;
-	int argc ;
-	int current_arg ;
-	off_t current_arg_offset ;
+	string* argv;
+	bool delimit_args;
+	int argc;
+	int current_arg;
+	off_t current_arg_offset;
 
-	int status ;
-	bool has_output ;
-} global ;
+	int status;
+	bool has_output;
+} global;
 
 
 typedef struct char_name
 {
-	string name ;
-	string long_name ;
-} char_name ;
+	string name;
+	string long_name;
+} char_name;
 
 static char_name specials[] =
 {
@@ -78,7 +78,7 @@ static char_name specials[] =
 	[0x1e] = {	"RS",	"record separator" },
 	[0x1f] = {	"US",	"unit separator" },
 	[0x7f] = {	"DEL",	"delete" }
-} ;
+};
 
 void usage(int status)
 {
@@ -113,184 +113,184 @@ void version(void)
 string strskp(const char* str, const char target[])
 {
 	if (!str || !target)
-		return NULL ;
+		return NULL;
 	while (*str != '\0' && strchr(target, *str))
-		str++ ;
-	return (string)str ;
+		str++;
+	return (string)str;
 }
 
 string strseek(const char* str, const char target[])
 {
 	if (!str || !target)
-		return NULL ;
+		return NULL;
 	while (*str != '\0' && !strchr(target, *str))
-		str++ ;
-	return (string)str ;
+		str++;
+	return (string)str;
 }
 
 static inline size_t read_stdin(buffer_t destination, size_t size)
 {
-	size_t result ;
+	size_t result;
 
 	if (feof(stdin))
-		return 0 ;
-	return fread(destination, 1, size, stdin) ;
+		return 0;
+	return fread(destination, 1, size, stdin);
 }
 
 static size_t read_argv(buffer_t destination, size_t size)
 {
-	string current_arg = global.argv[global.current_arg] + global.current_arg_offset ;
-	size_t current_arg_length ;
-	size_t amount_to_read ;
-	size_t total_amount_left_to_read = size ;
+	string current_arg = global.argv[global.current_arg] + global.current_arg_offset;
+	size_t current_arg_length;
+	size_t amount_to_read;
+	size_t total_amount_left_to_read = size;
 
 	while (total_amount_left_to_read > 0 && global.current_arg < global.argc)
 	{
-		current_arg_length = strlen(current_arg) ;
-		amount_to_read = min(current_arg_length, total_amount_left_to_read) ;
+		current_arg_length = strlen(current_arg);
+		amount_to_read = min(current_arg_length, total_amount_left_to_read);
 
-		strncpy(destination, current_arg, amount_to_read) ;
-		global.current_arg_offset += amount_to_read ;
-		total_amount_left_to_read -= amount_to_read ;
-		destination += amount_to_read ;
+		strncpy(destination, current_arg, amount_to_read);
+		global.current_arg_offset += amount_to_read;
+		total_amount_left_to_read -= amount_to_read;
+		destination += amount_to_read;
 
 		if (global.argv[global.current_arg][global.current_arg_offset] == '\0')
 		{
-			global.current_arg++ ;
-			global.current_arg_offset = 0 ;
+			global.current_arg++;
+			global.current_arg_offset = 0;
 			if (global.delimit_args)
 			{
-				*(char*)destination++ = ' ' ;
-				total_amount_left_to_read-- ;
+				*(char*)destination++ = ' ';
+				total_amount_left_to_read--;
 			}
-			current_arg = global.argv[global.current_arg] ;
+			current_arg = global.argv[global.current_arg];
 		}
 	}
 
-	return size - total_amount_left_to_read ;
+	return size - total_amount_left_to_read;
 }
 
 static void list_special_chars(void)
 {
-	unsigned int i ;
-	printf("Dec\tHex\tShort\tLong\n") ;
+	unsigned int i;
+	printf("Dec\tHex\tShort\tLong\n");
 	for (i = 0 ; i < (unsigned int)(sizeof(specials)/sizeof(char_name)) ; i++)
 	{
 		if (specials[i].name == NULL && specials[i].long_name == NULL)
-			continue ;
-		printf("%3u\t%02x\t%s\t%s\n", i, i, specials[i].name, specials[i].long_name) ;
+			continue;
+		printf("%3u\t%02x\t%s\t%s\n", i, i, specials[i].name, specials[i].long_name);
 	}
 }
 
 static inline int put_special_char_raw(unsigned char c)
 {
-	putchar(c) ;
-	return 1 ;
+	putchar(c);
+	return 1;
 }
 
 static inline int put_special_char_short_name(unsigned char c)
 {
-	return printf("[%s]", specials[c].name) ;
+	return printf("[%s]", specials[c].name);
 }
 
 static inline int put_special_char_long_name(unsigned char c)
 {
-	return printf("\"%s\"", specials[c].long_name) ;
+	return printf("\"%s\"", specials[c].long_name);
 }
 
 static inline unsigned char get_nonstandard_char_raw(unsigned char c)
 {
-	return c ;
+	return c;
 }
 
 static inline unsigned char get_nonstandard_char_placeholder(unsigned char c)
 {
-	return global.nonstandard_placeholder ;
+	return global.nonstandard_placeholder;
 }
 
 static inline bool is_special(unsigned char c)
 {
-	return 0 <= c && c < 0x20 || c == 0x7f ;
+	return 0 <= c && c < 0x20 || c == 0x7f;
 }
 
 static inline bool is_printable(unsigned char c)
 {
-	return 0x20 <= c && c < 0x7f ;
+	return 0x20 <= c && c < 0x7f;
 }
 
 static void codes_to_chars(char number_format, unsigned char* input_buffer, size_t input_buffer_size)
 {
-	size_t last_read ;
-	char number_format_string[] = "%?" ;
-	char error_number_format_string[] = "%?;" ;
-	number_format_string[1] = error_number_format_string[1] = number_format ;
+	size_t last_read;
+	char number_format_string[] = "%?";
+	char error_number_format_string[] = "%?;";
+	number_format_string[1] = error_number_format_string[1] = number_format;
 
-	last_read = global.read_input(input_buffer, input_buffer_size) ;
+	last_read = global.read_input(input_buffer, input_buffer_size);
 	while (last_read > 0)
 	{
-		string tail ;
+		string tail;
 
-		input_buffer[last_read++] = '\0' ;
-		tail = strskp(input_buffer, WHITESPACE) ;
+		input_buffer[last_read++] = '\0';
+		tail = strskp(input_buffer, WHITESPACE);
 
 		while (*tail != '\0')
 		{
-			int c_as_int, assigned ;
+			int c_as_int, assigned;
 
-			assigned = sscanf(tail, number_format_string, &c_as_int) ;
+			assigned = sscanf(tail, number_format_string, &c_as_int);
 			if (assigned && c_as_int == (int)(unsigned char)c_as_int) // valid char
 			{
-				unsigned char c = (unsigned char) c_as_int ;
+				unsigned char c = (unsigned char) c_as_int;
 
 				if (is_printable(c))
-					putchar(c) ;
+					putchar(c);
 				else if (is_special(c))
-					global.put_special_char(c) ;
+					global.put_special_char(c);
 				else
-					putchar(global.get_nonstandard_char(c)) ;
-				global.has_output = true ;
+					putchar(global.get_nonstandard_char(c));
+				global.has_output = true;
 			}
 			else
 			{
-				string end ;
-				size_t len ;
-				end = strseek(tail, WHITESPACE) ;
-				*end = '\0' ;
-				fprintf(stderr, "%s;", tail) ;
+				string end;
+				size_t len;
+				end = strseek(tail, WHITESPACE);
+				*end = '\0';
+				fprintf(stderr, "%s;", tail);
 				*end = ' ' ; // doesn't matter what whitespace was there before
-				global.status = EXIT_FAILURE ;
+				global.status = EXIT_FAILURE;
 			}
 			
 			tail = strseek(tail, WHITESPACE) ; // skip the number you've just read
 			tail = strskp(tail, WHITESPACE) ; // go to the next number
 		}
 
-		last_read = global.read_input(input_buffer, input_buffer_size) ;
+		last_read = global.read_input(input_buffer, input_buffer_size);
 	}
 }
 
 static void chars_to_codes(char number_format, unsigned char* input_buffer, size_t input_buffer_size)
 {
-	size_t last_read ;
-	char number_format_string[] = " %?" ;
+	size_t last_read;
+	char number_format_string[] = " %?";
 	string current_number_format_string = number_format_string+1 ; // dont print a space on the first time.
-	number_format_string[2] = number_format ;
+	number_format_string[2] = number_format;
 
-	last_read = global.read_input(input_buffer, input_buffer_size) ;
+	last_read = global.read_input(input_buffer, input_buffer_size);
 	while (last_read > 0)
 	{
-		int i ;
+		int i;
 		for (i = 0 ; i < last_read ; i++)
 		{
-			unsigned char c = input_buffer[i] ;
-			size_t formatted ;
+			unsigned char c = input_buffer[i];
+			size_t formatted;
 
-			formatted = printf(current_number_format_string, (int)c) ;
+			formatted = printf(current_number_format_string, (int)c);
 			current_number_format_string = number_format_string ; // the next writes will print a space before the number.
-			global.has_output = true ;
+			global.has_output = true;
 		}
 
-		last_read = global.read_input(input_buffer, input_buffer_size) ;
+		last_read = global.read_input(input_buffer, input_buffer_size);
 	}
 }
 
@@ -301,17 +301,17 @@ void close_stdout(void)
 
 int main (int argc, char **argv)
 {
-	void (*ascii)(char, unsigned char*, size_t) ;
+	void (*ascii)(char, unsigned char*, size_t);
 
 	size_t insize; /* Optimal size of i/o operations of input.  */
 	size_t page_size = getpagesize ();
-	unsigned char* input_buffer ;
+	unsigned char* input_buffer;
 
 	int argind; /* Index in argv to processed argument.  */
-	int c ;
+	int c;
 
-	char number_format = 'd' ;
-	bool end_with_newline = true ;
+	char number_format = 'd';
+	bool end_with_newline = true;
 
 	static struct option const long_options[] =
 	{
@@ -327,12 +327,12 @@ int main (int argc, char **argv)
 		{NULL, 0, NULL, 0}
 	};
 
-	global.delimit_args = false ;
-	global.nonstandard_placeholder = 0xff ;
-	global.status = EXIT_SUCCESS ;
-	global.put_special_char = put_special_char_raw ;
-	global.get_nonstandard_char = get_nonstandard_char_placeholder ;
-	ascii = chars_to_codes ;
+	global.delimit_args = false;
+	global.nonstandard_placeholder = 0xff;
+	global.status = EXIT_SUCCESS;
+	global.put_special_char = put_special_char_raw;
+	global.get_nonstandard_char = get_nonstandard_char_placeholder;
+	ascii = chars_to_codes;
 
 	atexit (close_stdout);
 
@@ -341,37 +341,37 @@ int main (int argc, char **argv)
 		switch (c)
 		{
 			case 'a':
-				ascii = codes_to_chars ;
-				global.delimit_args = true ;
+				ascii = codes_to_chars;
+				global.delimit_args = true;
 				break;
 
 			case 'x':
-				number_format = 'x' ;
+				number_format = 'x';
 				break;
 
 			case 'n':
-				end_with_newline = false ;
+				end_with_newline = false;
 				break;
 
 			case 's':
 				if (global.put_special_char != put_special_char_raw)
-					usage(EXIT_FAILURE) ;
-				global.put_special_char = put_special_char_short_name ;
+					usage(EXIT_FAILURE);
+				global.put_special_char = put_special_char_short_name;
 				break;
 
 			case 'S':
 				if (global.put_special_char != put_special_char_raw)
-					usage(EXIT_FAILURE) ;
-				global.put_special_char = put_special_char_long_name ;
+					usage(EXIT_FAILURE);
+				global.put_special_char = put_special_char_long_name;
 				break;
 
 			case 'l':
-				list_special_chars() ;
-				exit(EXIT_SUCCESS) ;
+				list_special_chars();
+				exit(EXIT_SUCCESS);
 				break;
 
 			case 'p':
-				global.get_nonstandard_char = get_nonstandard_char_raw ;
+				global.get_nonstandard_char = get_nonstandard_char_raw;
 				break;
 
 			case HELP_OPT:
@@ -391,29 +391,29 @@ int main (int argc, char **argv)
 	if (argind >= argc) // no args: read from stdin
 	{
 		insize = 4096;
-		global.read_input = read_stdin ;
+		global.read_input = read_stdin;
 	}
 	else
 	{
-		global.argv = argv + argind ;
-		global.argc = argc - argind ;
-		global.current_arg = 0 ;
-		global.current_arg_offset = 0 ;
-		global.read_input = read_argv ;
-		insize = ARGUMENT_BUFFER_SIZE ;
+		global.argv = argv + argind;
+		global.argc = argc - argind;
+		global.current_arg = 0;
+		global.current_arg_offset = 0;
+		global.read_input = read_argv;
+		insize = ARGUMENT_BUFFER_SIZE;
 	}
 
-	input_buffer = (unsigned char*)malloc(sizeof(unsigned char) * insize) ;
+	input_buffer = (unsigned char*)malloc(sizeof(unsigned char) * insize);
 	if (!input_buffer)
 	{
-		fprintf(stderr, "not enough memory\n") ;
-		exit(EXIT_FAILURE) ;
+		fprintf(stderr, "not enough memory\n");
+		exit(EXIT_FAILURE);
 	}
-	global.has_output = false ;
-	ascii(number_format, input_buffer, insize) ;
-	free(input_buffer) ;
+	global.has_output = false;
+	ascii(number_format, input_buffer, insize);
+	free(input_buffer);
 	if (end_with_newline && global.has_output)
-		printf("\n", 1) ;
+		printf("\n", 1);
 
 	exit(global.status);
 }
