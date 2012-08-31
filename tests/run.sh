@@ -16,6 +16,7 @@ if $VERBOSE; then
 fi
 
 for TEST in $TESTS; do
+	rm -rf $TMPDIR/*
 	$TEST && continue
 	echo "test `basename $TEST` failed!"
 	exit 1
