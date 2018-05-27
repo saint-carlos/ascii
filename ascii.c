@@ -20,7 +20,8 @@ typedef enum bool { false, true } bool;
 
 static struct
 {
-	size_t (*read_input)(buffer_t destination, size_t size) ; /* read 'size' bytes into 'destination'. returns the amount of bytes read. */
+	size_t (*read_chars)(buffer_t destination, size_t size) ; /* read 'size' bytes into 'destination'. returns the amount of bytes read. */
+	bool (*read_token)(string destination) ;
 	int (*put_special_char)(unsigned char c) ; /* put a representation of the special char 'c' into 'destination', returns amount of characters written */
 	unsigned char (*get_nonstandard_char)(unsigned char c) ; /* return a representation for the nonstandard character 'c' */
 
@@ -128,7 +129,7 @@ string strseek(const char* str, const char target[])
 	return (string)str;
 }
 
-static inline size_t read_stdin(buffer_t destination, size_t size)
+static inline size_t read_chars_stdin(buffer_t destination, size_t size)
 {
 	size_t result;
 
@@ -137,7 +138,14 @@ static inline size_t read_stdin(buffer_t destination, size_t size)
 	return fread(destination, 1, size, stdin);
 }
 
-static size_t read_argv(buffer_t destination, size_t size)
+static inline bool read_token_stdin(string destination)
+{
+	int ret;
+	ret = scanf("%s", destination);
+	return ret == EOF;
+}
+
+static size_t read_chars_argv(buffer_t destination, size_t size)
 {
 	string current_arg = global.argv[global.current_arg] + global.current_arg_offset;
 	size_t current_arg_length;
@@ -168,6 +176,21 @@ static size_t read_argv(buffer_t destination, size_t size)
 	}
 
 	return size - total_amount_left_to_read;
+}
+
+static bool read_token_argv(string destination)
+{
+	string src;
+
+	if (global.current_arg >= global.argc)
+	{
+		return true;
+	}
+	
+	src = global.argv[global.current_arg];
+	strcpy(destination, src);
+	global.current_arg++;
+	return false;
 }
 
 static void list_special_chars(void)
@@ -220,52 +243,37 @@ static inline bool is_printable(unsigned char c)
 
 static void codes_to_chars(char number_format, unsigned char* input_buffer, size_t input_buffer_size)
 {
-	size_t last_read;
+	bool eof;
+	string s = (string)input_buffer;
 	char number_format_string[] = "%?";
 	char error_number_format_string[] = "%?;";
 	number_format_string[1] = error_number_format_string[1] = number_format;
 
-	last_read = global.read_input(input_buffer, input_buffer_size);
-	while (last_read > 0)
+	eof = global.read_token(s);
+	while (!eof)
 	{
-		string tail;
+		int c_as_int, assigned;
 
-		input_buffer[last_read++] = '\0';
-		tail = strskp(input_buffer, WHITESPACE);
-
-		while (*tail != '\0')
+		assigned = sscanf(s, number_format_string, &c_as_int);
+		if (assigned && c_as_int == (int)(unsigned char)c_as_int) // valid char
 		{
-			int c_as_int, assigned;
+			unsigned char c = (unsigned char) c_as_int;
 
-			assigned = sscanf(tail, number_format_string, &c_as_int);
-			if (assigned && c_as_int == (int)(unsigned char)c_as_int) // valid char
-			{
-				unsigned char c = (unsigned char) c_as_int;
-
-				if (is_printable(c))
-					putchar(c);
-				else if (is_special(c))
-					global.put_special_char(c);
-				else
-					putchar(global.get_nonstandard_char(c));
-				global.has_output = true;
-			}
+			if (is_printable(c))
+				putchar(c);
+			else if (is_special(c))
+				global.put_special_char(c);
 			else
-			{
-				string end;
-				size_t len;
-				end = strseek(tail, WHITESPACE);
-				*end = '\0';
-				fprintf(stderr, "%s;", tail);
-				*end = ' ' ; // doesn't matter what whitespace was there before
-				global.status = EXIT_FAILURE;
-			}
-			
-			tail = strseek(tail, WHITESPACE) ; // skip the number you've just read
-			tail = strskp(tail, WHITESPACE) ; // go to the next number
+				putchar(global.get_nonstandard_char(c));
+			global.has_output = true;
+		}
+		else
+		{
+			fprintf(stderr, "%s;", s);
+			global.status = EXIT_FAILURE;
 		}
 
-		last_read = global.read_input(input_buffer, input_buffer_size);
+		eof = global.read_token(s);
 	}
 }
 
@@ -276,7 +284,7 @@ static void chars_to_codes(char number_format, unsigned char* input_buffer, size
 	string current_number_format_string = number_format_string+1 ; // dont print a space on the first time.
 	number_format_string[2] = number_format;
 
-	last_read = global.read_input(input_buffer, input_buffer_size);
+	last_read = global.read_chars(input_buffer, input_buffer_size);
 	while (last_read > 0)
 	{
 		int i;
@@ -290,7 +298,7 @@ static void chars_to_codes(char number_format, unsigned char* input_buffer, size
 			global.has_output = true;
 		}
 
-		last_read = global.read_input(input_buffer, input_buffer_size);
+		last_read = global.read_chars(input_buffer, input_buffer_size);
 	}
 }
 
@@ -304,7 +312,6 @@ int main (int argc, char **argv)
 	void (*ascii)(char, unsigned char*, size_t);
 
 	size_t insize; /* Optimal size of i/o operations of input.  */
-	size_t page_size = getpagesize ();
 	unsigned char* input_buffer;
 
 	int argind; /* Index in argv to processed argument.  */
@@ -391,7 +398,8 @@ int main (int argc, char **argv)
 	if (argind >= argc) // no args: read from stdin
 	{
 		insize = 4096;
-		global.read_input = read_stdin;
+		global.read_chars = read_chars_stdin;
+		global.read_token = read_token_stdin;
 	}
 	else
 	{
@@ -399,7 +407,8 @@ int main (int argc, char **argv)
 		global.argc = argc - argind;
 		global.current_arg = 0;
 		global.current_arg_offset = 0;
-		global.read_input = read_argv;
+		global.read_chars = read_chars_argv;
+		global.read_token = read_token_argv;
 		insize = ARGUMENT_BUFFER_SIZE;
 	}
 
@@ -413,7 +422,7 @@ int main (int argc, char **argv)
 	ascii(number_format, input_buffer, insize);
 	free(input_buffer);
 	if (end_with_newline && global.has_output)
-		printf("\n", 1);
+		printf("\n");
 
 	exit(global.status);
 }
