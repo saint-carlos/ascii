@@ -1,7 +1,6 @@
 #!/bin/bash
 
 . $TESTDIR/common.sh
-PLACEHOLDER=255
 
 FILE="$TMPDIR/$$"
 echo "100 120 40" > $FILE-01

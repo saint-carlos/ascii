@@ -1,0 +1,34 @@
+Dec	Hex	Short	Long
+  0	00	NUL	null
+  1	01	SOH	start of heading
+  2	02	STX	start of text
+  3	03	ETX	end of text
+  4	04	EOT	end of transmit
+  5	05	ENQ	enquiry
+  6	06	ACK	positive acknowledge
+  7	07	BEL	bell
+  8	08	BS	backspace
+  9	09	HT	horizontal tab
+ 10	0a	LF	line feed
+ 11	0b	VT	vertical tab
+ 12	0c	FF	form feed
+ 13	0d	CR	carriage return
+ 14	0e	SO	shift out
+ 15	0f	SI	shift in
+ 16	10	DLW	data link escape
+ 17	11	DC1	device control 1
+ 18	12	DC2	device control 2
+ 19	13	DC3	device control 3
+ 20	14	DC4	device control 4
+ 21	15	NAK	negative acknowledge
+ 22	16	SYM	synchronous idle
+ 23	17	ETB	end of transmit block
+ 24	18	CAN	cancel
+ 25	19	EM	end of medium
+ 26	1a	SUB	substitute
+ 27	1b	ESC	escape
+ 28	1c	PS	file separator
+ 29	1d	GS	group separator
+ 30	1e	RS	record separator
+ 31	1f	US	unit separator
+127	7f	DEL	delete

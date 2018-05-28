@@ -218,7 +218,7 @@ static inline int put_special_char_short_name(unsigned char c)
 
 static inline int put_special_char_long_name(unsigned char c)
 {
-	return printf("\"%s\"", specials[c].long_name);
+	return printf("[\"%s\"]", specials[c].long_name);
 }
 
 static inline unsigned char get_nonstandard_char_raw(unsigned char c)

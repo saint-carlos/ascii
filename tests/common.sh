@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PLACEHOLDER=255
+
 vcmp()
 {
 	cmp --print-bytes --verbose "$@"
@@ -12,7 +14,9 @@ mute_ascii()
 
 to_chars()
 {
-	tr ' ' '\n' | xargs -L 1 printf '\\\\%o\n' | xargs -L 1 printf
+	tr ' ' '\n' \
+		| xargs -L 1 --no-run-if-empty printf '\\\\%o\n' \
+		| xargs -L 1 printf
 }
 
 dummy_ascii()
@@ -23,7 +27,7 @@ dummy_ascii()
 				continue
 			fi
 			if $1 && [ $NUM -ge 128 ]; then
-				NUM=$PLACEHOLDER
+				NUM="$PLACEHOLDER"
 			fi
 			printf "$NUM "
 		done
