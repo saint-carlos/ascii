@@ -72,9 +72,129 @@ def parse_args():
         args.newline = True
     return args
 
+class NumFormat:
+    def __init__(self, base):
+        self.base = base
+        if base == 10:
+            self.fmt = str
+        elif base == 16:
+            self.fmt = lambda x: "{:x}".format(x)
+
+    def from_str(self, s):
+        try:
+            return int(s, self.base)
+        except ValueError:
+            return None
+
+    def to_str(self, n):
+        self.fmt(n)
+
+    def is_number(self, s):
+        return self.from_str(s) is not None
+
+def set_number_format(ctx):
+    if ctx.cfg.hexadecimal:
+        ctx.num_format = NumFormat(16)
+    else:
+        ctx.num_format = NumFormat(10)
+
+def identity(x):
+    return x
+
+def mask_nonstandard(c):
+    if ord(c) >= 128:
+        return NONSTANDARD_PLACEHOLDER_CHR
+    else:
+        return c
+
+def set_nonstandard_format(ctx):
+    if ctx.cfg.print_nonsstandard:
+        ctx.emit_chr = identity
+    else:
+        ctx.emit_chr = mask_nonstandard
+
+class Input:
+    def __init__(self, num_format):
+        self.num_format = num_format
+
+    def require_number(self, token):
+        if not self.num_format.is_number(token):
+            pass # TODO emit to stderr
+
+    def next_number(self):
+        while True:
+            next_token = self.next_token()
+            if not next_token:
+                return None
+            valid = self.require_number(next_token)
+            if valid:
+                return next_token
+
+class ArgInput(Input):
+    def __init__(self, args, num_format):
+        super().__init__(num_format)
+        self.args = args
+        self.next = 0
+
+    def next_token(self):
+        current = self.next
+        self.next += 1
+        return args[current]
+
+    def next_str(self):
+        return self.next_token()
+
+class StreamInput(Input):
+    def __init__(self, stream, num_format):
+        super().__init__(num_format)
+        self.stream = stream
+        self.next_array = None
+        self.next_idx = 0
+
+    def next_token(self):
+        if not self.next_array:
+            s = self.next_str()
+            if not s:
+                return None
+            self.next_array = s.split()
+            self.next_idx = 0
+        current = self.next_idx
+        self.next_idx += 1
+        return self.next_array[current]
+
+    def next_str(self):
+        return self.stream.read()
+
+def set_input(ctx, stdin):
+    if ctx.cfg.arg:
+        ctx.input = ArgInput(ctx.cfg.arg, ctx.num_format)
+    else:
+        ctx.input = StreamInput(stdin, ctx.num_format)
+
 def invoke(s, *args, **kwargs):
     f = getattr(sys.modules[__name__], s)
     f(*args, **kwargs)
 
+def to_char(ctx):
+    pass
+
+def from_char(ctx):
+    pass
+
+def list_special(ctx):
+    pass
+
+def table(ctx):
+    pass
+
+def table_all(ctx):
+    pass
+
 args = parse_args()
 print(args)
+ctx = { cfg: Config(args) }
+set_number_format(ctx)
+set_special_char_format(ctx)
+set_nonstandard_format(ctx)
+set_input(ctx, sys.argv, sys.stdin)
+invoke(args.function, cfg)
