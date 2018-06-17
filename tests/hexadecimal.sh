@@ -43,6 +43,7 @@ dd if=/dev/urandom of=$FILE-11 count=200 bs=200 2>/dev/null
 expected=`mktemp $TMPDIR/expected.XXX`
 actual=`mktemp $TMPDIR/actual.XXX`
 for INPUT in $FILE-*; do
+	echo "input: $INPUT"
 	to_codes < $INPUT > $expected
 	$ascii -x < $INPUT > $actual
 	diff -u $expected $actual || exit 1

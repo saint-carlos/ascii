@@ -292,7 +292,7 @@ def set_input(ctx, instream):
         ctx.input = StreamInput(instream, ctx.num_format, ctx)
 
 def emit_optional_newline(ctx):
-    if ctx.cfg.newline:
+    if ctx.cfg.newline and ctx.has_output:
         print()
 
 def to_char(ctx):
@@ -302,6 +302,7 @@ def to_char(ctx):
             break
         c = ctx.emit_chr(chr(n))
         print(c, end='')
+        ctx.has_output = True
     emit_optional_newline(ctx)
 
 def from_char(ctx):
@@ -319,6 +320,7 @@ def from_char(ctx):
 
         num_strs = [ctx.num_format.to_str(ord(c)) for c in s]
         print(*num_strs, sep=' ', end='')
+        ctx.has_output = True
 
     emit_optional_newline(ctx)
 
@@ -340,6 +342,7 @@ class Ctx:
 ctx = Ctx()
 
 ctx.cfg = parse_args()
+ctx.has_output = False
 ctx.err = 0
 
 set_number_format(ctx)
