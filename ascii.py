@@ -272,13 +272,9 @@ class ArgInput(Input):
         return self.args[current]
 
 class StreamInput(Input):
-    def __init__(self, num_format, function, ctx):
+    def __init__(self, num_format, ctx):
         super().__init__(num_format, ctx)
-        if function == 'to_char':
-            # i.e. "from numbers
-            self.instream = sys.stdin
-        else:
-            self.instream = open("/dev/stdin", 'rb')
+        self.instream = sys.stdin
         self.next_array = None
         self.next_idx = 0
 
@@ -296,7 +292,7 @@ class StreamInput(Input):
         return res
 
     def next_buf(self):
-        buf = self.instream.read()
+        buf = self.instream.buffer.read()
         if not buf:
             return None
         return buf
@@ -305,7 +301,7 @@ def set_input(ctx):
     if ctx.cfg.arg:
         ctx.input = ArgInput(ctx.cfg.arg, ctx.num_format, ctx)
     else:
-        ctx.input = StreamInput(ctx.num_format, ctx.cfg.function, ctx)
+        ctx.input = StreamInput(ctx.num_format, ctx)
 
 def emit_optional_newline(ctx):
     if ctx.cfg.newline and ctx.has_output:
