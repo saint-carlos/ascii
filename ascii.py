@@ -7,8 +7,12 @@ import os
 PROG_DESC = 'Translate between ASCII numbers and their ASCII codes.'
 PROG_VERSION = 'ascii 2.0'
 
+def cbyte(n):
+    return bytes([n])
+
 NONSTANDARD_PLACEHOLDER = 0xff
 NONSTANDARD_PLACEHOLDER_CHR = chr(NONSTANDARD_PLACEHOLDER)
+NONSTANDARD_PLACEHOLDER_BYTE = cbyte(NONSTANDARD_PLACEHOLDER)
 
 parser = argparse.ArgumentParser(description=PROG_DESC,
         formatter_class=argparse.RawTextHelpFormatter)
@@ -148,64 +152,60 @@ def special_chars_table(special_chars_cfg):
     else:
         return None
 
-def identity(x):
-    return x
+def is_nonstandard_char(n):
+    return n >= 128
 
-def is_nonstandard_char(c):
-    return ord(c) >= 128
-
-def is_special_char(c):
-    n = ord(c)
+def is_special_char(n):
     return n < 32 or n == 127
 
 def list_chars(types):
     global special_chars
     print('Dec\tHex\tShort\tLong')
-    for i in range(0, 256):
-        c = chr(i)
+    for n in range(0, 256):
+        c = cbyte(n)
         short_str = None
-        if is_special_char(c):
+        if is_special_char(n):
             if 'special' in types:
-                short_str = special_chars[i][0]
-                long_str = special_chars[i][1]
-        elif is_nonstandard_char(c):
+                short_str = special_chars[n][0]
+                long_str = special_chars[n][1]
+        elif is_nonstandard_char(n):
             if 'nonstandard' in types:
                 short_str = c
-                long_str = NONSTANDARD_PLACEHOLDER_CHR
+                long_str = NONSTANDARD_PLACEHOLDER_BYTE
         else:
             if 'regular' in types:
                 short_str = c
                 long_str = c
         if short_str is not None:
             print('{dec:3d}\t{hex:02x}\t{short}\t{long}'.format(
-                dec=i,
-                hex=i,
+                dec=n,
+                hex=n,
                 short=short_str,
                 long=long_str
             ))
 
-def mask_nonstandard(c):
-    if is_nonstandard_char(c):
-        return NONSTANDARD_PLACEHOLDER_CHR
+def mask_nonstandard(n):
+    if is_nonstandard_char(n):
+        return NONSTANDARD_PLACEHOLDER_BYTE
     else:
-        return c
+        return cbyte(n)
 
 def mk_transform_special_char(table):
-    def transform_special_char(c):
-        if is_special_char(c):
-            return table[c]
+    def transform_special_char(n):
+        if is_special_char(n):
+            return table[n]
         else:
-            return c
+            return cbyte(n)
     return transform_special_char
 
 def mk_friendly_char(table):
-    def friendly_char(c):
-        if is_nonstandard_char(c):
-            return NONSTANDARD_PLACEHOLDER_CHR
-        elif is_special_char(c):
-            return table[ord(c)]
+    def friendly_char(n):
+        if is_nonstandard_char(n):
+            return NONSTANDARD_PLACEHOLDER_BYTE
+        elif is_special_char(n):
+            return table[n]
         else:
-            return c
+            return cbyte(n)
     return friendly_char
 
 def set_char_emitter(ctx):
@@ -214,7 +214,7 @@ def set_char_emitter(ctx):
     table = special_chars_table(ctx.cfg.special_chars)
     # this is a poor optimization attempt:
     if print_nonstandard and raw_special_chars:
-        ctx.emit_chr = identity
+        ctx.emit_chr = cbyte
     elif raw_special_chars:
         ctx.emit_chr = mask_nonstandard
     elif print_nonstandard:
@@ -272,7 +272,8 @@ class StreamInput(Input):
             buf = self.next_buf()
             if not buf:
                 return None
-            self.next_array = str(buf).split()
+            s = str(buf)
+            self.next_array = s.split()
             self.next_idx = 0
         res = self.next_array[self.next_idx]
         self.next_idx += 1
@@ -301,8 +302,8 @@ def to_char(ctx):
         n = ctx.input.next_number()
         if n is None:
             break
-        c = ctx.emit_chr(chr(n))
-        print(c, end='')
+        b = ctx.emit_chr(n)
+        sys.stdout.buffer.write(b)
         ctx.has_output = True
     emit_optional_newline(ctx)
 
