@@ -272,18 +272,23 @@ class StreamInput(Input):
                 return None
             self.next_array = s.split()
             self.next_idx = 0
-        current = self.next_idx
+        res = self.next_array[self.next_idx]
         self.next_idx += 1
-        return self.next_array[current]
+        if self.next_idx >= len(self.next_array):
+            self.next_array = None
+        return res
 
     def next_str(self):
-        return self.stream.read()
+        s = self.stream.read()
+        if s == "":
+            return None
+        return s
 
-def set_input(ctx, stdin):
+def set_input(ctx, instream):
     if ctx.cfg.arg:
         ctx.input = ArgInput(ctx.cfg.arg, ctx.num_format)
     else:
-        ctx.input = StreamInput(stdin, ctx.num_format)
+        ctx.input = StreamInput(instream, ctx.num_format)
 
 def emit_optional_newline(ctx):
     if ctx.cfg.newline:
@@ -312,7 +317,6 @@ def from_char(ctx):
         first_str = False
 
         num_strs = [ctx.num_format.to_str(ord(c)) for c in s]
-        print(num_strs)
         print(*num_strs, sep=' ', end='')
 
     emit_optional_newline(ctx)
@@ -335,7 +339,6 @@ class Ctx:
 ctx = Ctx()
 
 ctx.cfg = parse_args()
-print(ctx.cfg)
 
 set_number_format(ctx)
 set_char_emitter(ctx)
