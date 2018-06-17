@@ -141,7 +141,8 @@ def mk_char_table(prefix, column, postfix):
     global special_chars
     res = {}
     for k, v in special_chars.items():
-        res[k] = prefix + v[column] + postfix
+        s = prefix + v[column] + postfix
+        res[k] = s.encode('ASCII')
     return res
 
 def special_chars_table(special_chars_cfg):
@@ -225,6 +226,7 @@ def set_char_emitter(ctx):
 class Input:
     def __init__(self, num_format, ctx):
         self.num_format = num_format
+        self.ctx = ctx
 
     def token_to_num(self, token):
         n = self.num_format.from_str(token)
@@ -251,14 +253,17 @@ class ArgInput(Input):
         self.next = 0
 
     def next_token(self):
+        res = self.next_buf()
+        if not res:
+            return None
+        return res.decode('ASCII')
+
+    def next_buf(self):
         current = self.next
         if current >= len(self.args):
             return None
         self.next += 1
         return self.args[current]
-
-    def next_buf(self):
-        return self.next_token()
 
 class StreamInput(Input):
     def __init__(self, stream, num_format, ctx):
@@ -272,7 +277,7 @@ class StreamInput(Input):
             buf = self.next_buf()
             if not buf:
                 return None
-            s = str(buf)
+            s = buf.decode('ASCII')
             self.next_array = s.split()
             self.next_idx = 0
         res = self.next_array[self.next_idx]
