@@ -222,13 +222,14 @@ def set_char_emitter(ctx):
         ctx.emit_chr = mk_friendly_char(table)
 
 class Input:
-    def __init__(self, num_format):
+    def __init__(self, num_format, ctx):
         self.num_format = num_format
 
     def token_to_num(self, token):
         n = self.num_format.from_str(token)
         if n is None:
             print(token + ";", file=sys.stderr, end='')
+            self.ctx.err = 1
             return None
         else:
             return n
@@ -243,8 +244,8 @@ class Input:
                 return n
 
 class ArgInput(Input):
-    def __init__(self, args, num_format):
-        super().__init__(num_format)
+    def __init__(self, args, num_format, ctx):
+        super().__init__(num_format, ctx)
         self.args = args
         self.next = 0
 
@@ -259,8 +260,8 @@ class ArgInput(Input):
         return self.next_token()
 
 class StreamInput(Input):
-    def __init__(self, stream, num_format):
-        super().__init__(num_format)
+    def __init__(self, stream, num_format, ctx):
+        super().__init__(num_format, ctx)
         self.stream = stream
         self.next_array = None
         self.next_idx = 0
@@ -286,9 +287,9 @@ class StreamInput(Input):
 
 def set_input(ctx, instream):
     if ctx.cfg.arg:
-        ctx.input = ArgInput(ctx.cfg.arg, ctx.num_format)
+        ctx.input = ArgInput(ctx.cfg.arg, ctx.num_format, ctx)
     else:
-        ctx.input = StreamInput(instream, ctx.num_format)
+        ctx.input = StreamInput(instream, ctx.num_format, ctx)
 
 def emit_optional_newline(ctx):
     if ctx.cfg.newline:
@@ -339,8 +340,10 @@ class Ctx:
 ctx = Ctx()
 
 ctx.cfg = parse_args()
+ctx.err = 0
 
 set_number_format(ctx)
 set_char_emitter(ctx)
 set_input(ctx, sys.stdin)
 invoke(ctx.cfg.function, ctx)
+sys.exit(ctx.err)
