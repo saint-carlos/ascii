@@ -6,7 +6,7 @@ TESTS := $(addprefix tests/,${TEST_FILES})
 all: ${EXEC}
 
 clean:
-	rm -rf ${EXEC} ${TMP_TEST}
+	rm -rf ${TMP_TEST}
 
 test: ${EXEC} ${TESTS}
 	mkdir -p ${TMP_TEST}
