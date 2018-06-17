@@ -77,6 +77,12 @@ def parse_args():
         args.newline = True
     return args
 
+def buf_to_str(buf):
+    return buf.decode('raw_unicode_escape')
+
+def str_to_buf(s):
+    return s.encode('ascii')
+
 class NumFormat:
     def __init__(self, base):
         self.base = base
@@ -142,7 +148,7 @@ def mk_char_table(prefix, column, postfix):
     res = {}
     for k, v in special_chars.items():
         s = prefix + v[column] + postfix
-        res[k] = s.encode('ASCII')
+        res[k] = str_to_buf(s)
     return res
 
 def special_chars_table(special_chars_cfg):
@@ -163,7 +169,7 @@ def list_chars(types):
     global special_chars
     print('Dec\tHex\tShort\tLong')
     for n in range(0, 256):
-        c = cbyte(n)
+        c = buf_to_str(cbyte(n))
         short_str = None
         if is_special_char(n):
             if 'special' in types:
@@ -172,7 +178,7 @@ def list_chars(types):
         elif is_nonstandard_char(n):
             if 'nonstandard' in types:
                 short_str = c
-                long_str = NONSTANDARD_PLACEHOLDER_BYTE
+                long_str = NONSTANDARD_PLACEHOLDER_CHR
         else:
             if 'regular' in types:
                 short_str = c
@@ -253,10 +259,10 @@ class ArgInput(Input):
         self.next = 0
 
     def next_token(self):
-        res = self.next_buf()
-        if not res:
+        buf = self.next_buf()
+        if not buf:
             return None
-        return res.decode('ASCII')
+        return buf_to_str(buf)
 
     def next_buf(self):
         current = self.next
@@ -277,7 +283,7 @@ class StreamInput(Input):
             buf = self.next_buf()
             if not buf:
                 return None
-            s = buf.decode('ASCII')
+            s = buf_to_str(buf)
             self.next_array = s.split()
             self.next_idx = 0
         res = self.next_array[self.next_idx]

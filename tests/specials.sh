@@ -30,11 +30,12 @@ special_to_char()
 	sed "$SCRIPT"
 }
 
-fail=0
 FILE="$TMPDIR/$$"
 
 $ascii -l > $FILE.actual
-diff -u tests/specials.out $FILE.actual || fail=1
+diff -u tests/specials.out $FILE.actual || exit 1
+$ascii -t > $FILE.actual
+diff -u tests/all.out $FILE.actual || exit 1
 
 for (( i=0 ; i < ${#str[@]} ; i++))
 do

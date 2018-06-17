@@ -1,0 +1,129 @@
+Dec	Hex	Short	Long
+  0	00	NUL	null
+  1	01	SOH	start of heading
+  2	02	STX	start of text
+  3	03	ETX	end of text
+  4	04	EOT	end of transmit
+  5	05	ENQ	enquiry
+  6	06	ACK	positive acknowledge
+  7	07	BEL	bell
+  8	08	BS	backspace
+  9	09	HT	horizontal tab
+ 10	0a	LF	line feed
+ 11	0b	VT	vertical tab
+ 12	0c	FF	form feed
+ 13	0d	CR	carriage return
+ 14	0e	SO	shift out
+ 15	0f	SI	shift in
+ 16	10	DLW	data link escape
+ 17	11	DC1	device control 1
+ 18	12	DC2	device control 2
+ 19	13	DC3	device control 3
+ 20	14	DC4	device control 4
+ 21	15	NAK	negative acknowledge
+ 22	16	SYM	synchronous idle
+ 23	17	ETB	end of transmit block
+ 24	18	CAN	cancel
+ 25	19	EM	end of medium
+ 26	1a	SUB	substitute
+ 27	1b	ESC	escape
+ 28	1c	PS	file separator
+ 29	1d	GS	group separator
+ 30	1e	RS	record separator
+ 31	1f	US	unit separator
+ 32	20	 	 
+ 33	21	!	!
+ 34	22	"	"
+ 35	23	#	#
+ 36	24	$	$
+ 37	25	%	%
+ 38	26	&	&
+ 39	27	'	'
+ 40	28	(	(
+ 41	29	)	)
+ 42	2a	*	*
+ 43	2b	+	+
+ 44	2c	,	,
+ 45	2d	-	-
+ 46	2e	.	.
+ 47	2f	/	/
+ 48	30	0	0
+ 49	31	1	1
+ 50	32	2	2
+ 51	33	3	3
+ 52	34	4	4
+ 53	35	5	5
+ 54	36	6	6
+ 55	37	7	7
+ 56	38	8	8
+ 57	39	9	9
+ 58	3a	:	:
+ 59	3b	;	;
+ 60	3c	<	<
+ 61	3d	=	=
+ 62	3e	>	>
+ 63	3f	?	?
+ 64	40	@	@
+ 65	41	A	A
+ 66	42	B	B
+ 67	43	C	C
+ 68	44	D	D
+ 69	45	E	E
+ 70	46	F	F
+ 71	47	G	G
+ 72	48	H	H
+ 73	49	I	I
+ 74	4a	J	J
+ 75	4b	K	K
+ 76	4c	L	L
+ 77	4d	M	M
+ 78	4e	N	N
+ 79	4f	O	O
+ 80	50	P	P
+ 81	51	Q	Q
+ 82	52	R	R
+ 83	53	S	S
+ 84	54	T	T
+ 85	55	U	U
+ 86	56	V	V
+ 87	57	W	W
+ 88	58	X	X
+ 89	59	Y	Y
+ 90	5a	Z	Z
+ 91	5b	[	[
+ 92	5c	\	\
+ 93	5d	]	]
+ 94	5e	^	^
+ 95	5f	_	_
+ 96	60	`	`
+ 97	61	a	a
+ 98	62	b	b
+ 99	63	c	c
+100	64	d	d
+101	65	e	e
+102	66	f	f
+103	67	g	g
+104	68	h	h
+105	69	i	i
+106	6a	j	j
+107	6b	k	k
+108	6c	l	l
+109	6d	m	m
+110	6e	n	n
+111	6f	o	o
+112	70	p	p
+113	71	q	q
+114	72	r	r
+115	73	s	s
+116	74	t	t
+117	75	u	u
+118	76	v	v
+119	77	w	w
+120	78	x	x
+121	79	y	y
+122	7a	z	z
+123	7b	{	{
+124	7c	|	|
+125	7d	}	}
+126	7e	~	~
+127	7f	DEL	delete
