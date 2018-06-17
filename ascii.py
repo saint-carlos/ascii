@@ -272,18 +272,21 @@ class ArgInput(Input):
         return self.args[current]
 
 class StreamInput(Input):
-    def __init__(self, stream, num_format, ctx):
+    def __init__(self, num_format, function, ctx):
         super().__init__(num_format, ctx)
-        self.stream = stream
+        if function == 'to_char':
+            # i.e. "from numbers
+            self.instream = sys.stdin
+        else:
+            self.instream = open("/dev/stdin", 'rb')
         self.next_array = None
         self.next_idx = 0
 
     def next_token(self):
         if not self.next_array:
-            buf = self.next_buf()
-            if not buf:
+            s = self.instream.read()
+            if not s:
                 return None
-            s = buf_to_str(buf)
             self.next_array = s.split()
             self.next_idx = 0
         res = self.next_array[self.next_idx]
@@ -293,16 +296,16 @@ class StreamInput(Input):
         return res
 
     def next_buf(self):
-        buf = self.stream.read()
+        buf = self.instream.read()
         if not buf:
             return None
         return buf
 
-def set_input(ctx, instream):
+def set_input(ctx):
     if ctx.cfg.arg:
         ctx.input = ArgInput(ctx.cfg.arg, ctx.num_format, ctx)
     else:
-        ctx.input = StreamInput(instream, ctx.num_format, ctx)
+        ctx.input = StreamInput(ctx.num_format, ctx.cfg.function, ctx)
 
 def emit_optional_newline(ctx):
     if ctx.cfg.newline and ctx.has_output:
@@ -358,6 +361,6 @@ ctx.err = 0
 
 set_number_format(ctx)
 set_char_emitter(ctx)
-set_input(ctx, open("/dev/stdin", 'rb'))
+set_input(ctx)
 invoke(ctx.cfg.function, ctx)
 sys.exit(ctx.err)
