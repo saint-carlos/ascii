@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+import os
 
 PROG_DESC = 'Translate between ASCII numbers and their ASCII codes.'
 PROG_VERSION = 'ascii 2.0'
@@ -61,7 +62,7 @@ a placeholder (with ascii code {NONSTANDARD_PLACEHOLDER}, which is '{NONSTANDARD
 parser.add_argument('-n', '--no-newline',
         dest='newline', action='store_false',
         help='do not append a newline after processing input.')
-parser.add_argument('arg', nargs='*',
+parser.add_argument('arg', nargs='*', type=os.fsencode,
         help='the string to be translated. if not given, read from stdin.')
 
 def parse_args():
@@ -237,7 +238,7 @@ class Input:
     def next_number(self):
         while True:
             next_token = self.next_token()
-            if next_token is None:
+            if not next_token:
                 return None
             n = self.token_to_num(next_token)
             if n is not None:
@@ -256,7 +257,7 @@ class ArgInput(Input):
         self.next += 1
         return self.args[current]
 
-    def next_str(self):
+    def next_buf(self):
         return self.next_token()
 
 class StreamInput(Input):
@@ -268,10 +269,10 @@ class StreamInput(Input):
 
     def next_token(self):
         if not self.next_array:
-            s = self.next_str()
-            if not s:
+            buf = self.next_buf()
+            if not buf:
                 return None
-            self.next_array = s.split()
+            self.next_array = str(buf).split()
             self.next_idx = 0
         res = self.next_array[self.next_idx]
         self.next_idx += 1
@@ -279,11 +280,11 @@ class StreamInput(Input):
             self.next_array = None
         return res
 
-    def next_str(self):
-        s = self.stream.read()
-        if s == "":
+    def next_buf(self):
+        buf = self.stream.read()
+        if not buf:
             return None
-        return s
+        return buf
 
 def set_input(ctx, instream):
     if ctx.cfg.arg:
@@ -308,17 +309,15 @@ def to_char(ctx):
 def from_char(ctx):
     first_str = True
     while True:
-        s = ctx.input.next_str()
-        if s is None:
+        buf = ctx.input.next_buf()
+        if buf is None:
             break
-        if s == "":
-            continue
 
         if not first_str:
             print(' ', end='')
         first_str = False
 
-        num_strs = [ctx.num_format.to_str(ord(c)) for c in s]
+        num_strs = [ctx.num_format.to_str(c) for c in list(buf)]
         print(*num_strs, sep=' ', end='')
         ctx.has_output = True
 
@@ -347,6 +346,6 @@ ctx.err = 0
 
 set_number_format(ctx)
 set_char_emitter(ctx)
-set_input(ctx, sys.stdin)
+set_input(ctx, open("/dev/stdin", 'rb'))
 invoke(ctx.cfg.function, ctx)
 sys.exit(ctx.err)
