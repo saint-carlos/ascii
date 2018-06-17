@@ -4,7 +4,7 @@
 
 to_codes()
 {
-	od -t u1 | sed 's/  */ /g' | cut -s -d' ' -f 2- | tr '\n' ' ' | sed 's/ $//'
+	od -v -t u1 | sed 's/  */ /g' | cut -s -d' ' -f 2- | tr '\n' ' ' | sed 's/ $//'
 }
 
 FILEBASE=$TMPDIR/file-$$
