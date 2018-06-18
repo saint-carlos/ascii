@@ -98,8 +98,6 @@ class NumFormat:
         self.base = base
         if base == 10:
             self.fmttab = fmttab_dec
-            #self.fmt = str
-            self.fmt = str
         elif base == 16:
             self.fmttab = fmttab_hex
         self.fmt = lambda n: self.fmttab[n]
