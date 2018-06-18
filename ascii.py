@@ -116,8 +116,8 @@ class NumFormat:
     def to_str(self, n):
         return self.fmt(n)[1:]
 
-    def to_str_prespaced(self, n):
-        return self.fmt(n)
+    def get_to_str_prespaced(self):
+        return self.fmt
 
 def set_number_format(ctx):
     init_fmttab()
@@ -335,7 +335,7 @@ def to_char(ctx):
     emit_optional_newline(ctx)
 
 def from_char(ctx):
-    to_str_prespaced = ctx.num_format.to_str_prespaced
+    to_str_prespaced = ctx.num_format.get_to_str_prespaced()
     first_str = True
     while True:
         buf = ctx.input.next_buf()
