@@ -83,13 +83,26 @@ def buf_to_str(buf):
 def str_to_buf(s):
     return s.encode('ascii')
 
+fmttab_dec = []
+fmttab_hex = []
+
+def init_fmttab():
+    global fmttab_dec
+    global fmttab_hex
+    for n in range(0, 256):
+        fmttab_dec.append(str_to_buf(" {}".format(n)))
+        fmttab_hex.append(str_to_buf(" {:x}".format(n)))
+
 class NumFormat:
     def __init__(self, base):
         self.base = base
         if base == 10:
+            self.fmttab = fmttab_dec
+            #self.fmt = str
             self.fmt = str
         elif base == 16:
-            self.fmt = lambda x: "{:x}".format(x)
+            self.fmttab = fmttab_hex
+        self.fmt = lambda n: self.fmttab[n]
 
     def from_str(self, s):
         try:
@@ -101,9 +114,13 @@ class NumFormat:
             return None
 
     def to_str(self, n):
+        return self.fmt(n)[1:]
+
+    def to_str_prespaced(self, n):
         return self.fmt(n)
 
 def set_number_format(ctx):
+    init_fmttab()
     base = 10 if ctx.cfg.decimal else 16
     ctx.num_format = NumFormat(base)
 
@@ -318,6 +335,7 @@ def to_char(ctx):
     emit_optional_newline(ctx)
 
 def from_char(ctx):
+    to_str_prespaced = ctx.num_format.to_str_prespaced
     first_str = True
     while True:
         buf = ctx.input.next_buf()
@@ -325,11 +343,19 @@ def from_char(ctx):
             break
 
         if not first_str:
-            print(' ', end='')
+            sys.stdout.buffer.write(b' ')
         first_str = False
 
-        num_strs = [ctx.num_format.to_str(c) for c in list(buf)]
-        print(*num_strs, sep=' ', end='')
+        sys.stdout.buffer.write(ctx.num_format.to_str(buf[0]))
+        #s = ctx.num_format.to_str(buf[0])
+        for b in buf[1:]:
+            sys.stdout.buffer.write(to_str_prespaced(b))
+        
+        # for b in buf[1:]:
+        #     print(' ' + to_str(b), end='')
+        #num_strs = [ctx.num_format.to_str(c) for c in list(buf)]
+        #print(*num_strs, sep=' ', end='')
+        #print(*map(lambda n: to_str_prespaced(n), buf[1:]), sep=' ', end='')
         ctx.has_output = True
 
     emit_optional_newline(ctx)
