@@ -345,15 +345,8 @@ def from_char(ctx):
         first_str = False
 
         sys.stdout.buffer.write(ctx.num_format.to_str(buf[0]))
-        #s = ctx.num_format.to_str(buf[0])
         for b in buf[1:]:
             sys.stdout.buffer.write(to_str_prespaced(b))
-        
-        # for b in buf[1:]:
-        #     print(' ' + to_str(b), end='')
-        #num_strs = [ctx.num_format.to_str(c) for c in list(buf)]
-        #print(*num_strs, sep=' ', end='')
-        #print(*map(lambda n: to_str_prespaced(n), buf[1:]), sep=' ', end='')
         ctx.has_output = True
 
     emit_optional_newline(ctx)
