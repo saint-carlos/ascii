@@ -158,7 +158,7 @@ special_chars = {
     0x7f: [ "DEL",  "delete"                ]
 }
 
-def mk_char_table(prefix, column, postfix):
+def mk_special_chars_table(prefix, column, postfix):
     global special_chars
     res = {}
     for k, v in special_chars.items():
@@ -168,9 +168,9 @@ def mk_char_table(prefix, column, postfix):
 
 def special_chars_table(special_chars_cfg):
     if special_chars_cfg == 'short':
-        return mk_char_table('[', 0, ']')
+        return mk_special_chars_table('[', 0, ']')
     elif special_chars_cfg == 'long':
-        return mk_char_table('["', 1, '"]')
+        return mk_special_chars_table('["', 1, '"]')
     else:
         return None
 
@@ -206,43 +206,25 @@ def list_chars(types):
                 long=long_str
             ))
 
-def mask_nonstandard(n):
-    if is_nonstandard_char(n):
-        return NONSTANDARD_PLACEHOLDER_BYTE
-    else:
-        return cbyte(n)
-
-def mk_transform_special_char(table):
-    def transform_special_char(n):
-        if is_special_char(n):
-            return table[n]
-        else:
-            return cbyte(n)
-    return transform_special_char
-
-def mk_friendly_char(table):
-    def friendly_char(n):
-        if is_nonstandard_char(n):
-            return NONSTANDARD_PLACEHOLDER_BYTE
-        elif is_special_char(n):
-            return table[n]
-        else:
-            return cbyte(n)
-    return friendly_char
-
 def set_char_emitter(ctx):
-    print_nonstandard = ctx.cfg.print_nonstandard
-    raw_special_chars = ctx.cfg.special_chars == 'raw'
+    transform_special = ctx.cfg.special_chars != 'raw'
+    transform_nonstandard = not ctx.cfg.print_nonstandard
     table = special_chars_table(ctx.cfg.special_chars)
-    # this is a poor optimization attempt:
-    if print_nonstandard and raw_special_chars:
-        ctx.emit_chr = cbyte
-    elif raw_special_chars:
-        ctx.emit_chr = mask_nonstandard
-    elif print_nonstandard:
-        ctx.emit_chr = mk_transform_special_char(table)
-    else:
-        ctx.emit_chr = mk_friendly_char(table)
+
+    chartab = []
+    for n in range(0, 256):
+        if transform_special and is_special_char(n):
+            b = table[n]
+        elif transform_nonstandard and is_nonstandard_char(n):
+            b = NONSTANDARD_PLACEHOLDER_BYTE
+        else:
+            b = cbyte(n)
+        chartab.append(b)
+
+    def emit_chr(n):
+        return chartab[n]
+
+    ctx.emit_chr = emit_chr
 
 class Input:
     def __init__(self, num_format, ctx):
