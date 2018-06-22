@@ -86,29 +86,40 @@ def str_to_buf(s):
 fmttab_dec = []
 fmttab_hex = []
 
+rfmttab_dec = {}
+rfmttab_hex = {}
+
 def init_fmttab():
     global fmttab_dec
     global fmttab_hex
+    global rfmttab_dec
+    global rfmttab_hex
     for n in range(0, 256):
-        fmttab_dec.append(str_to_buf(" {}".format(n)))
-        fmttab_hex.append(str_to_buf(" {:x}".format(n)))
+        decstr = " {}".format(n)
+        hexstr = " {:x}".format(n)
+        hexzstr = "{:02x}".format(n)
+        fmttab_dec.append(str_to_buf(decstr))
+        fmttab_hex.append(str_to_buf(hexstr))
+        rfmttab_dec[decstr[1:]] = n
+        rfmttab_hex[hexstr[1:]] = n
+        rfmttab_hex[hexzstr] = n
 
 class NumFormat:
     def __init__(self, base):
         self.base = base
         if base == 10:
             self.fmttab = fmttab_dec
+            self.rfmttab = rfmttab_dec
         elif base == 16:
             self.fmttab = fmttab_hex
+            self.rfmttab = rfmttab_hex
         self.fmt = lambda n: self.fmttab[n]
 
     def from_str(self, s):
         try:
-            n = int(s, self.base)
-            if n < 0 or n >= 256:
-                return None
+            n = self.rfmttab[s]
             return n
-        except ValueError:
+        except:
             return None
 
     def to_str(self, n):
