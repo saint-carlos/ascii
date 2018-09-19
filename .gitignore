@@ -1,1 +1,3 @@
 ascii
+tests/tmp/
+__pycache__/
