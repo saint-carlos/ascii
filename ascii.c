@@ -96,6 +96,7 @@ void usage(int status)
 				"   -s, --special-chars         print special nonprintable characters as their descriptive acronyms (e.g. a backspace is BS).\n"
 				"   -S, --long-special-chars    print special nonprintable characters as their descriptive long names.\n"
 				"   -l, --list-special          list the known special characters and exit.\n"
+				"   -t, --table                 display ascii table and exit.\n"
 				"   -p, --nonstandard           print non-standard characters (of a value 128 or higher) instead of just a placeholder. this may not work correctly or as expected when the output is the terminal, depending on your terminal. your terminal may also choose to print nonstandard characters as placeholders.\n"
 				"   --help                      display this help and exit.\n"
 				"   --version                   output version information and exit.\n"
@@ -193,18 +194,6 @@ static bool read_token_argv(string destination)
 	return false;
 }
 
-static void list_special_chars(void)
-{
-	unsigned int i;
-	printf("Dec\tHex\tShort\tLong\n");
-	for (i = 0 ; i < (unsigned int)(sizeof(specials)/sizeof(char_name)) ; i++)
-	{
-		if (specials[i].name == NULL && specials[i].long_name == NULL)
-			continue;
-		printf("%3u\t%02x\t%s\t%s\n", i, i, specials[i].name, specials[i].long_name);
-	}
-}
-
 static inline int put_special_char_raw(unsigned char c)
 {
 	putchar(c);
@@ -239,6 +228,52 @@ static inline bool is_special(unsigned char c)
 static inline bool is_printable(unsigned char c)
 {
 	return 0x20 <= c && c < 0x7f;
+}
+
+#define LIST_SPECIAL		(1 << 0)
+#define LIST_NONSTANDARD	(1 << 1)
+#define LIST_REGULAR		(1 << 2)
+
+static void list_chars(int which)
+{
+	unsigned int c;
+	unsigned char* long_name;
+	unsigned char* short_name;
+	unsigned char printable[] = " ";
+	printf("Dec\tHex\tShort\tLong\n");
+	for (c = 0 ; c < 256 ; c++)
+	{
+		long_name = NULL;
+		if (is_printable(c))
+		{
+			if (which & LIST_REGULAR)
+			{
+				printable[0] = c;
+				long_name = printable;
+				short_name = printable;
+			}
+		}
+		else if (is_special(c))
+		{
+			if (which & LIST_SPECIAL)
+			{
+				long_name = specials[c].long_name;
+				short_name = specials[c].name;
+			}
+		}
+		else
+		{
+			if ((which & LIST_NONSTANDARD))
+			{
+				printable[0] = get_nonstandard_char_placeholder(c);
+				long_name = printable;
+				short_name = printable;
+			}
+		}
+		if (!long_name)
+			continue;
+		printf("%3u\t%02x\t%s\t%s\n", c, c, short_name, long_name);
+	}
 }
 
 static void codes_to_chars(char number_format, unsigned char* input_buffer, size_t input_buffer_size)
@@ -328,6 +363,7 @@ int main (int argc, char **argv)
 		{"special-chars", no_argument, NULL, 's'},
 		{"long-special-chars", no_argument, NULL, 'S'},
 		{"list-special", no_argument, NULL, 'l'},
+		{"table", no_argument, NULL, 't'},
 		{"nonstandard", no_argument, NULL, 'p'},
 		{"help", no_argument, NULL, HELP_OPT},
 		{"version", no_argument, NULL, VERSION_OPT},
@@ -343,7 +379,7 @@ int main (int argc, char **argv)
 
 	atexit (close_stdout);
 
-	while ((c = getopt_long(argc, argv, "axnsSlp", long_options, NULL)) != -1)
+	while ((c = getopt_long(argc, argv, "axnsSlpt", long_options, NULL)) != -1)
 	{
 		switch (c)
 		{
@@ -373,7 +409,12 @@ int main (int argc, char **argv)
 				break;
 
 			case 'l':
-				list_special_chars();
+				list_chars(LIST_SPECIAL);
+				exit(EXIT_SUCCESS);
+				break;
+
+			case 't':
+				list_chars(LIST_REGULAR | LIST_SPECIAL);
 				exit(EXIT_SUCCESS);
 				break;
 
