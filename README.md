@@ -12,6 +12,7 @@ it translates numbers to bytes and vice versa.
 * hex or decimal input/output
 * 3 types of ascii tables
 * masking nonstandard (> 127) characters
+* (slightly outdated) man page
 
 ## Dual implementation
 
@@ -99,6 +100,7 @@ C implementation:
 ```
 # ./ascii --help
 # ./ascii.py --help
+# man -l ascii.1
 ```
 
 ## Test
