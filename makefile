@@ -9,6 +9,7 @@ all: ${CEXEC} ${PYEXEC}
 
 clean:
 	rm -rf ${TMP_TEST}
+	rm -f ${CEXEC}
 
 test: ctest pytest
 
