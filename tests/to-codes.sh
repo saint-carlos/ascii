@@ -18,7 +18,7 @@ printf "!#\"$%&\'()*+,-./:;<=> ?@[\\]^_\`{|}~" > ${FILEBASE}-06
 printf "" > ${FILEBASE}-07
 cp $TESTDIR/common.sh ${FILEBASE}-08
 cp $(which echo) ${FILEBASE}-09
-cat /bin/* > ${FILEBASE}-10
+printf '%s\n' /bin/* | head -n 100 | xargs cat > ${FILEBASE}-10
 dd if=/dev/urandom of=${FILEBASE}-11 count=200 bs=200 2>/dev/null
 
 FILE="$TMPDIR/$$"

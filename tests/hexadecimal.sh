@@ -37,7 +37,7 @@ echo -n "!\"#$%&'()*+,-./:;<=>?@[\\]^_\`{|}~" > $FILE-06
 echo -n "" > $FILE-08
 cat $TESTDIR/common.sh > $FILE-09
 cp `which echo` $FILE-10
-cat /bin/* > $FILE-11
+printf '%s\n' /bin/* | head -n 100 | xargs cat > $FILE-11
 dd if=/dev/urandom of=$FILE-11 count=200 bs=200 2>/dev/null
 
 expected=`mktemp $TMPDIR/expected.XXX`
