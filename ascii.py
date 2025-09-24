@@ -35,7 +35,7 @@ parser.add_argument('--special-chars',
         dest='special_chars', choices=['raw', 'short', 'long'], default='raw',
         help='''how to emit special characters:
 raw: emit the character as is.
-long: emit descriptive name, e.g. ["backspace"]. 
+long: emit descriptive name, e.g. ["backspace"].
 short: emit a mnemonic, e.g. [BS] for backspace.''')
 parser.add_argument('-s', '--short-special-chars',
         dest='special_chars', action='store_const', const='short',
